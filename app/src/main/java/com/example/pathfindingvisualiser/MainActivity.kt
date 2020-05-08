@@ -280,9 +280,15 @@ class MainActivity : AppCompatActivity() {
             for (i in 0..(v[x][y].size -1)) {
 
                 if (dis[v[x][y][i][0]][v[x][y][i][1]] > ((dis[x][y]) + (v[x][y][i][2]))) {
-                    if ((v[x][y][i][0] != desx) or  (v[x][y][i][1] != desy)) {
-                    buttons[v[x][y][i][0]][v[x][y][i][1]].background=gdForRedColor
-                    delay(100)}
+                    if ((v[x][y][i][0] != desx) or (v[x][y][i][1] != desy)) {
+                        if (weight[v[x][y][i][0]][v[x][y][i][1]] == 1) {
+                            buttons[v[x][y][i][0]][v[x][y][i][1]].background = gdForRedColor
+                            delay(40)
+                            buttons[v[x][y][i][0]][v[x][y][i][1]].background = gdForBlueColor
+                            delay(40)
+                        }
+
+                    }
                     dis[v[x][y][i][0]][v[x][y][i][1]] = ((dis[x][y]) + (v[x][y][i][2]))
 
                     path[v[x][y][i][0]][v[x][y][i][1]].removeAll(path[v[x][y][i][0]][v[x][y][i][1]])
@@ -402,7 +408,8 @@ class MainActivity : AppCompatActivity() {
                                 button.background = gdForWhiteColor
                                 buttonStatusRow.put(button, 0)
                             } else {
-                                button.background = gdForBlueColor
+                                button.setBackgroundResource(R.drawable.ic_gymnastic)
+                                //button.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#000000")))
                                 buttonStatusRow.put(button, 2)
                             }
                             return@setOnLongClickListener true
@@ -438,6 +445,10 @@ class MainActivity : AppCompatActivity() {
                         } else if (buttonStatus == 1) {
                             button.background=gdForWhiteColor
                             buttonStatusRow.put(button, 0)
+                        }
+                        else if (buttonStatus == 2) {
+                            button.background = gdForBrownColor
+                            buttonStatusRow.put(button, 1)
                         }
                     }
                 }
