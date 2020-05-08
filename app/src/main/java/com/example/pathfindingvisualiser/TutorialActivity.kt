@@ -102,7 +102,6 @@ class TutorialActivity : AppCompatActivity() {
 
             dotsLayout.addView(mDots[i])
         }
-        mDots[pos]?.textSize = 45F
         mDots[pos]?.setTextColor(Color.parseColor("#000000"))
     }
 

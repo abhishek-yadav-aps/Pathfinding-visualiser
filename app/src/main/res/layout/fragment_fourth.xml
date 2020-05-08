@@ -35,12 +35,14 @@
 
     <TextView
         android:id="@+id/textView13"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="-> Long press on grid to add weights ."
+        android:layout_marginEnd="24dp"
+        android:text="-> Click on weight before assigning them on grid to add weights."
         android:textColor="#00695C"
         android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textView12"
         app:layout_constraintTop_toBottomOf="@+id/textView14" />
 
