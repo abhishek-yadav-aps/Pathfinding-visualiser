@@ -11,7 +11,7 @@
     android:layout_width="match_parent"
     android:layout_height="0dp" android:layout_weight="20"
     android:orientation="vertical"
-    android:id="@+id/screen"></LinearLayout>
+    android:id="@+id/screen"/>
 
     <Button
         android:layout_width="match_parent"
