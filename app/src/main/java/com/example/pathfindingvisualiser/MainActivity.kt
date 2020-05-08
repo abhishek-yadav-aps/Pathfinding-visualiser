@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     val gdForGreenColor:GradientDrawable= GradientDrawable()
     val gdForBrownColor:GradientDrawable= GradientDrawable()
     val gdForWhiteColor:GradientDrawable= GradientDrawable()
+    val gdForBlueColor:GradientDrawable= GradientDrawable()
 
 
     var v:MutableList<MutableList<MutableList<MutableList<Int>>>> = mutableListOf()
@@ -316,6 +317,9 @@ class MainActivity : AppCompatActivity() {
                 if(buttonStatusKeeper[i].get(buttons[i][j])==1){
                     weight[i][j]=1000
                 }
+                else if(buttonStatusKeeper[i].get(buttons[i][j])==2){
+                    weight[i][j]=70
+                }
             }
         }
         var job1=GlobalScope.launch(Dispatchers.Main) {
@@ -353,6 +357,10 @@ class MainActivity : AppCompatActivity() {
         gdForWhiteColor.setColor(Color.parseColor("#FFFFFF"))
         gdForWhiteColor.cornerRadius=10.0f
         gdForWhiteColor.setStroke(1,Color.parseColor("#000000"))
+
+        gdForBlueColor.setColor(Color.parseColor("#0000FF"))
+        gdForBlueColor.cornerRadius=10.0f
+        gdForBlueColor.setStroke(1,Color.parseColor("#000000"))
     }
     private fun paintAllButtonsWhite() {
         for (i in 0..sizeb)
@@ -386,6 +394,23 @@ class MainActivity : AppCompatActivity() {
                 )
                 //button.setPadding(3,3,3,3)
                 button.background=null
+                button.setOnLongClickListener {
+                    if(startStatusKeeper==1) {
+                        if(endStatusKeeper==1) {
+                            val buttonStatus = buttonStatusRow.get(button)
+                            if (buttonStatus == 2) {
+                                button.background = gdForWhiteColor
+                                buttonStatusRow.put(button, 0)
+                            } else {
+                                button.background = gdForBlueColor
+                                buttonStatusRow.put(button, 2)
+                            }
+                            return@setOnLongClickListener true
+
+                        }
+                    }
+                    return@setOnLongClickListener false
+                }
                 button.setOnClickListener {
                     if(startStatusKeeper==0)
                     {
