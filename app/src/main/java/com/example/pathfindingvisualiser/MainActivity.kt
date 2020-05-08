@@ -3,6 +3,7 @@ package com.example.pathfindingvisualiser
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
@@ -12,20 +13,29 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
+
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.marginBottom
 import androidx.core.view.marginLeft
 import androidx.core.view.marginTop
 import androidx.core.view.setPadding
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class MainActivity : AppCompatActivity() {
     val buttonStatusKeeper: MutableList<MutableMap<Button,Int>> = ArrayList()
     val buttons: MutableList<MutableList<Button>> = ArrayList()
     val size=10
+    val sizeb=20
     var startStatusKeeper:Int=0
     var endStatusKeeper:Int=0
-    val graph: MutableList<MutableList<MutableList<Button>>> = ArrayList()
     var butsrcx:Int=0
     var butsrcy:Int=0
     var butdesx:Int=0
@@ -36,136 +46,316 @@ class MainActivity : AppCompatActivity() {
     val gdForBrownColor:GradientDrawable= GradientDrawable()
     val gdForWhiteColor:GradientDrawable= GradientDrawable()
 
+
+    var v:MutableList<MutableList<MutableList<MutableList<Int>>>> = mutableListOf()
+    var dis:MutableList<MutableList<Int>> = mutableListOf()
+    var path:MutableList<MutableList<MutableList<MutableList<Int>>>> = mutableListOf()
+    @RequiresApi(Build.VERSION_CODES.N)
+    var pq: PriorityQueue<Tuple2> = PriorityQueue<Tuple2>(ComparatorTuple)
+    var weight:MutableList<MutableList<Int>> = mutableListOf()
+    var sized: Int=0
+    var srcx: Int=0
+    var srcy: Int=0
+    var desx: Int=0
+    var desy: Int=0
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         gradientDrawableValueSetter()
         createButtonGrid()
         paintAllButtonsWhite()
-        //findPath()
         search.setOnClickListener {
-            findPath()
+            GlobalScope.launch(Dispatchers.Main) {
+            findPath()}
         }
-        
     }
+    fun weightMaker() {
+        for (i in 0..(sizeb)) {
+            var weightvec: MutableList<Int> = mutableListOf()
+            for (j in 0..(size)) {
+                weightvec.add(1)
+            }
+            weight.add(weightvec)
+        }
+    }
+    suspend fun mainer() {
+        //buttons[0][0].setBackgroundColor(Color.parseColor("#000000"))
+        for (i in 0..(sizeb)) {
+            var row: MutableList<MutableList<MutableList<Int>>> = mutableListOf()
+            for (j in 0..(size)) {
+                var point: MutableList<MutableList<Int>> = mutableListOf()
+                if (i == 0 && j == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i + 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i + 1][j])
+                    point.add(neigh1)
 
-    private fun findPath() {
-        var obj=dijikstra()
-        obj.size=size
-        obj.srcx=butsrcx
-        obj.srcy=butsrcy
-        obj.desx=butdesx
-        obj.desy=butdesy
-        obj.weightMaker()
-        for (i in 0..size-1){
-            for(j in 0..size-1){
-                if(buttonStatusKeeper[i].get(buttons[i][j])==1){
-                    obj.weight[i][j]=1000
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i)
+                    neigh2.add(j + 1)
+                    neigh2.add(weight[i][j + 1])
+                    point.add(neigh2)
+
+                } else if (i == sizeb  && j == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i - 1][j])
+                    point.add(neigh1)
+
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i)
+                    neigh2.add(j + 1)
+                    neigh2.add(weight[i][j + 1])
+                    point.add(neigh2)
+
+                } else if (i == 0 && j == size) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i + 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i + 1][j])
+                    point.add(neigh1)
+
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+                    neigh2.add(weight[i][j - 1])
+                    point.add(neigh2)
+
+                } else if (i == sizeb  && j == size ) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i - 1][j])
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+                    neigh2.add(weight[i][j - 1])
+                    point.add(neigh2)
+
+                } else if (i == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i + 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i + 1][j])
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+                    neigh2.add(weight[i][j - 1])
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j + 1)
+                    neigh3.add(weight[i][j + 1])
+                    point.add(neigh3)
+
+                } else if (i == sizeb) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i - 1][j])
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+                    neigh2.add(weight[i][j - 1])
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j + 1)
+                    neigh3.add(weight[i][j + 1])
+                    point.add(neigh3)
+
+                } else if (j == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i - 1][j])
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i + 1)
+                    neigh2.add(j)
+                    neigh2.add(weight[i + 1][j])
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j + 1)
+                    neigh3.add(weight[i][j + 1])
+                    point.add(neigh3)
+
+                } else if (j == size) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i - 1][j])
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i + 1)
+                    neigh2.add(j)
+                    neigh2.add(weight[i + 1][j])
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j - 1)
+                    neigh3.add(weight[i][j - 1])
+                    point.add(neigh3)
+
+                } else {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+                    neigh1.add(weight[i - 1][j])
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i + 1)
+                    neigh2.add(j)
+                    neigh2.add(weight[i + 1][j])
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j - 1)
+                    neigh3.add(weight[i][j - 1])
+                    point.add(neigh3)
+                    var neigh4: MutableList<Int> = mutableListOf()
+
+                    neigh4.add(i)
+                    neigh4.add(j + 1)
+                    neigh4.add(weight[i][j + 1])
+                    point.add(neigh4)
+
+                }
+                row.add(point)
+            }
+            v.add(row)
+        }
+
+        for (i in 0..(v.size - 1)) {
+            var disvec: MutableList<Int> = mutableListOf()
+            for (j in 0..(v[i].size - 1)) {
+                disvec.add(100)
+            }
+            dis.add(disvec)
+        }
+
+        for (i in 0..(v.size - 1)) {
+            var row: MutableList<MutableList<MutableList<Int>>> = mutableListOf()
+            for (j in 0..(v[i].size - 1)) {
+                var p: MutableList<MutableList<Int>> = mutableListOf()
+                row.add(p)
+            }
+            path.add(row)
+        }
+
+
+
+        var temp = Tuple2(0, srcx, srcy)
+        pq.add(temp)
+        dis[srcx][srcy] = 0
+        while (!pq.isEmpty()) {
+            var u = pq.peek()
+            pq.remove()
+            var x = u.x
+            var y = u.y
+            var d = u.d
+            //tester.append(x.toString()+" "+y.toString()+"\n")
+            if ((x == desx) and (y == desy)) {
+                break
+            }
+            for (i in 0..(v[x][y].size -1)) {
+
+                if (dis[v[x][y][i][0]][v[x][y][i][1]] > ((dis[x][y]) + (v[x][y][i][2]))) {
+                    if ((v[x][y][i][0] != desx) or  (v[x][y][i][1] != desy)) {
+                    buttons[v[x][y][i][0]][v[x][y][i][1]].background=gdForRedColor
+                    delay(100)}
+                    dis[v[x][y][i][0]][v[x][y][i][1]] = ((dis[x][y]) + (v[x][y][i][2]))
+
+                    path[v[x][y][i][0]][v[x][y][i][1]].removeAll(path[v[x][y][i][0]][v[x][y][i][1]])
+
+                    path[v[x][y][i][0]][v[x][y][i][1]] =
+                        mutableListOf<MutableList<Int>>().apply { addAll(path[x][y]) }
+                    var tem: MutableList<Int> = mutableListOf()
+                    tem.add(x)
+                    tem.add(y)
+                    path[v[x][y][i][0]][v[x][y][i][1]].add(tem)
+                    var dd: Int = dis[v[x][y][i][0]][v[x][y][i][1]]
+                    var xx: Int = v[x][y][i][0]
+                    var yy: Int = v[x][y][i][1]
+                    var temp2 = Tuple2(dd, xx, yy)
+                    pq.add(temp2)
                 }
             }
         }
-        obj.main()
-        var path=obj.path
-        tester.append(butsrcx.toString()+" "+butsrcy.toString()+"\n")
-        tester.append(butdesx.toString()+" "+butdesy.toString()+"\n")
-        for (i in 1..(path[butdesx][butdesy].size-1)){
-            buttons[path[butdesx][butdesy][i][0]][path[butdesx][butdesy][i][1]].setBackgroundColor(Color.parseColor("#008000"))
-            tester.append(path[butdesx][butdesy][i][0].toString()+" "+path[butdesx][butdesy][i][1].toString()+"\n")
-        }
     }
+    private suspend fun findPath() {
 
-    val graphh= listOf<Int>()
-
-    private fun createGraph() {
-        //inside grid
-        Log.i("grapher","missle")
-        for (i in 1 until size)
-        {
-            Log.i("grapher","missle1")
-            for (j in 1 until (size*2)-1){
-                //left
-                graph[i][j].add(buttons[i-1][j])
-                //top
-                Log.i("grapher","missle2")
-                graph[i][j].add(buttons[i][j-1])
-                //right
-                graph[i][j].add(buttons[i+1][j])
-                //bottom
-                graph[i][j].add(buttons[i][j+1])
+        sized=size+1
+        srcx=butsrcx
+        srcy=butsrcy
+        desx=butdesx
+        desy=butdesy
+        var job2=GlobalScope.launch(Dispatchers.Main) {
+        weightMaker()}
+        job2.join()
+        for (i in 0..sizeb){
+            for(j in 0..size){
+                if(buttonStatusKeeper[i].get(buttons[i][j])==1){
+                    weight[i][j]=1000
+                }
             }
         }
-        Log.i("grapher","missle3")
-        //top edges
-        for (i in 1..(size-1)){
-            //left
-            graph[i][0].add(buttons[i-1][0])
-            //right
-            graph[i][0].add(buttons[i+1][0])
-            //bottom
-            graph[i][0].add(buttons[i][1])
-        }
-        //bottom edges
-        for (i in 1..(size-1)){
-            //left
-            graph[i][(size*2)].add(buttons[i-1][(size*2)])
-            //right
-            graph[i][(size*2)].add(buttons[i+1][(size*2)])
-            //top
-            graph[i][(size*2)].add(buttons[i][(size*2)-1])
-        }
-        //left edges
-        for (i in 1..(size*2)-1){
-            //top
-            graph[0][i].add(buttons[0][i-1])
-            //right
-            graph[0][i].add(buttons[1][i])
-            //bottom
-            graph[0][i].add(buttons[0][i+1])
-        }
-        //right edges
-        for (i in 1..(size*2)-1){
-            //top
-            graph[size][i].add(buttons[size][i-1])
-            //left
-            graph[size][i].add(buttons[size-1][i])
-            //bottom
-            graph[size][i].add(buttons[size][i+1])
-        }
+        var job1=GlobalScope.launch(Dispatchers.Main) {
+        mainer()}
+        job1.join()
+        var pather=path
+        //tester.append(srcx.toString()+" "+srcy.toString()+butsrcx.toString()+" "+butsrcy.toString()+"\n")
+        //tester.append(desx.toString()+" "+desy.toString()+butdesx.toString()+" "+butdesy.toString()+"\n")
+        for (i in 1..(pather[butdesx][butdesy].size-1)){
 
-        //top-left corner
-        graph[0][0].add(buttons[0][1])//bottom
-        graph[0][0].add(buttons[1][0])//right
-        //top-right corner
-        graph[size][0].add(buttons[size][1])//bottom
-        graph[size][0].add(buttons[size-1][0])//left
-        //bottom-left corner
-        graph[0][(size*2)].add(buttons[0][(size*2)-1])//top
-        graph[0][(size*2)].add(buttons[1][(size*2)])//right
-        //bottom-right corner
-        graph[size][(size*2)-1].add(buttons[size][(size*2)-1])//top
-        graph[size][(size*2)-1].add(buttons[size-1][(size*2)])//right
+            buttons[pather[butdesx][butdesy][i][0]][pather[butdesx][butdesy][i][1]].background=gdForGreenColor
+
+            //tester.append(pather[butdesx][butdesy][i][0].toString()+" "+pather[butdesx][butdesy][i][1].toString()+"\n")
+
+
+
+        }
+        if(pather[butdesx][butdesy].size==0){
+            Toast.makeText(this,"NO PATH FOUND", Toast.LENGTH_LONG).show()
+        }
     }
-
     private fun gradientDrawableValueSetter() {
         gdForRedColor.setColor(Color.parseColor("#FF0000"))
-        gdForRedColor.cornerRadius=5.0f
+        gdForRedColor.cornerRadius=10.0f
         gdForRedColor.setStroke(1,Color.parseColor("#000000"))
 
         gdForBrownColor.setColor(Color.parseColor("#A52A2A"))
-        gdForBrownColor.cornerRadius=5.0f
+        gdForBrownColor.cornerRadius=10.0f
         gdForBrownColor.setStroke(1,Color.parseColor("#000000"))
 
         gdForGreenColor.setColor(Color.parseColor("#008000"))
-        gdForGreenColor.cornerRadius=5.0f
+        gdForGreenColor.cornerRadius=10.0f
         gdForGreenColor.setStroke(1,Color.parseColor("#000000"))
 
         gdForWhiteColor.setColor(Color.parseColor("#FFFFFF"))
-        gdForWhiteColor.cornerRadius=5.0f
+        gdForWhiteColor.cornerRadius=10.0f
         gdForWhiteColor.setStroke(1,Color.parseColor("#000000"))
     }
-
     private fun paintAllButtonsWhite() {
-        for (i in 0..size)
+        for (i in 0..sizeb)
         {
             for (j in 0..(size))
             {
@@ -173,22 +363,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun createButtonGrid() {
 
-        for (i in 0..size) {
+        for (i in 0..sizeb) {
 
             val arrayLinearLayout = LinearLayout(this)
             arrayLinearLayout.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.MATCH_PARENT,1.0f
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,1.0f
             )
-            arrayLinearLayout.orientation = LinearLayout.VERTICAL
+            arrayLinearLayout.orientation = LinearLayout.HORIZONTAL
             //arrayLinearLayout.setPadding(2,2,2,2)
 
-            val buttonStatusCol: MutableMap<Button,Int> = mutableMapOf()
-            val buttonCol:MutableList<Button> = mutableListOf()
-            val graphCol:MutableList<MutableList<Button>> = mutableListOf()
+            val buttonStatusRow: MutableMap<Button,Int> = mutableMapOf()
+            val buttonRow:MutableList<Button> = mutableListOf()
             for (j in 0..(size)) {
                 val button = Button(this)
                 button.layoutParams = LinearLayout.LayoutParams(
@@ -199,7 +387,6 @@ class MainActivity : AppCompatActivity() {
                 //button.setPadding(3,3,3,3)
                 button.background=null
                 button.setOnClickListener {
-
                     if(startStatusKeeper==0)
                     {
                         button.setBackgroundResource(R.drawable.ic_trending_flat_24px)
@@ -219,35 +406,25 @@ class MainActivity : AppCompatActivity() {
                         //findPath()
                     }
                     else {
-                        val buttonStatus = buttonStatusCol.get(button)
+                        val buttonStatus = buttonStatusRow.get(button)
                         if (buttonStatus == 0) {
                             button.background=gdForBrownColor
-                            buttonStatusCol.put(button, 1)
+                            buttonStatusRow.put(button, 1)
                         } else if (buttonStatus == 1) {
                             button.background=gdForWhiteColor
-                            buttonStatusCol.put(button, 0)
+                            buttonStatusRow.put(button, 0)
                         }
                     }
                 }
-                buttonStatusCol.put(button,0)
-                buttonCol.add(button)
+                buttonStatusRow.put(button,0)
+                buttonRow.add(button)
                 arrayLinearLayout.addView(button)
-                val graphPoint:MutableList<Button> = mutableListOf()
-                graphCol.add(graphPoint)
             }
-            buttonStatusKeeper.add(buttonStatusCol)
-            buttons.add(buttonCol)
-            graph.add(graphCol)
+            buttonStatusKeeper.add(buttonStatusRow)
+            buttons.add(buttonRow)
             screen.addView(arrayLinearLayout)
         }
-
-
-
     }
-
-
-
-
 }
 
 
