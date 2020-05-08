@@ -9,17 +9,18 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.Toast
+import android.widget.*
 
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.marginBottom
 import androidx.core.view.marginLeft
 import androidx.core.view.marginTop
 import androidx.core.view.setPadding
+import com.varunest.sparkbutton.SparkButton
+import com.varunest.sparkbutton.SparkButtonBuilder
+import com.varunest.sparkbutton.SparkEventListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -30,16 +31,17 @@ import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
-    val buttonStatusKeeper: MutableList<MutableMap<Button,Int>> = ArrayList()
-    val buttons: MutableList<MutableList<Button>> = ArrayList()
+    val buttonStatusKeeper: MutableList<MutableMap<SparkButton,Int>> = ArrayList()
+    val buttons: MutableList<MutableList<SparkButton>> = ArrayList()
     val size=10
     val sizeb=20
     var startStatusKeeper:Int=0
     var endStatusKeeper:Int=0
-    var butsrcx:Int=0
-    var butsrcy:Int=0
-    var butdesx:Int=0
-    var butdesy:Int=0
+    var butsrcx:Int=-1
+    var butsrcy:Int=-1
+    var butdesx:Int=-1
+    var butdesy:Int=-1
+    var buttonWeightStatus=0
 
     val gdForRedColor:GradientDrawable= GradientDrawable()
     val gdForGreenColor:GradientDrawable= GradientDrawable()
@@ -57,8 +59,8 @@ class MainActivity : AppCompatActivity() {
     var sized: Int=0
     var srcx: Int=0
     var srcy: Int=0
-    var desx: Int=0
-    var desy: Int=0
+    var desx: Int=-1
+    var desy: Int=-1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,12 +68,57 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         gradientDrawableValueSetter()
         createButtonGrid()
-        paintAllButtonsWhite()
+        //paintAllButtonsWhite()
         search.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
-            findPath()}
+            if(startStatusKeeper==0)
+                Toast.makeText(this,"Select Starting Node!!",Toast.LENGTH_LONG).show()
+            else if(endStatusKeeper==0)
+                Toast.makeText(this,"Select Ending Node!!",Toast.LENGTH_LONG).show()
+            else {
+                GlobalScope.launch(Dispatchers.Main) {
+                    findPath()
+                }
+            }
+        }
+        weightbut.setOnClickListener {
+            if(buttonWeightStatus==0)
+                buttonWeightStatus=1
+            else
+                buttonWeightStatus=0
+        }
+        clearbut.setOnClickListener {
+            clearGrid()
         }
     }
+
+    private fun clearGrid() {
+        var screenid = resources.getIdentifier("screen", "id", packageName)
+        val screen=findViewById<LinearLayout>(screenid)
+        (screen.getParent() as ViewGroup).removeView(screen)
+        buttons.removeAll(buttons)
+        buttonStatusKeeper.removeAll(buttonStatusKeeper)
+        startStatusKeeper=0
+        endStatusKeeper=0
+        butsrcx=-1
+        butsrcy=-1
+        butdesx=-1
+        butdesy=-1
+        buttonWeightStatus=0
+        v.removeAll(v)
+        dis.removeAll(dis)
+        path.removeAll(path)
+        weight.removeAll(weight)
+        sized=0
+        srcx=0
+        srcy=0
+        desx=-1
+        desy=-1
+        createButtonGrid()
+        search.isClickable=true
+        weightbut.isClickable=true
+
+    }
+
     fun weightMaker() {
         for (i in 0..(sizeb)) {
             var weightvec: MutableList<Int> = mutableListOf()
@@ -282,10 +329,9 @@ class MainActivity : AppCompatActivity() {
                 if (dis[v[x][y][i][0]][v[x][y][i][1]] > ((dis[x][y]) + (v[x][y][i][2]))) {
                     if ((v[x][y][i][0] != desx) or (v[x][y][i][1] != desy)) {
                         if (weight[v[x][y][i][0]][v[x][y][i][1]] == 1) {
-                            buttons[v[x][y][i][0]][v[x][y][i][1]].background = gdForRedColor
-                            delay(40)
-                            buttons[v[x][y][i][0]][v[x][y][i][1]].background = gdForBlueColor
-                            delay(40)
+                            buttons[v[x][y][i][0]][v[x][y][i][1]].setInactiveImage(R.drawable.ic_mathematics_blue)
+                            buttons[v[x][y][i][0]][v[x][y][i][1]].playAnimation()
+                            delay(50)
                         }
 
                     }
@@ -309,7 +355,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private suspend fun findPath() {
-
+        search.isClickable=false
+        weightbut.isClickable=false
+        clearbut.isClickable=false
         sized=size+1
         srcx=butsrcx
         srcy=butsrcy
@@ -324,7 +372,7 @@ class MainActivity : AppCompatActivity() {
                     weight[i][j]=1000
                 }
                 else if(buttonStatusKeeper[i].get(buttons[i][j])==2){
-                    weight[i][j]=70
+                    weight[i][j]=5
                 }
             }
         }
@@ -335,17 +383,18 @@ class MainActivity : AppCompatActivity() {
         //tester.append(srcx.toString()+" "+srcy.toString()+butsrcx.toString()+" "+butsrcy.toString()+"\n")
         //tester.append(desx.toString()+" "+desy.toString()+butdesx.toString()+" "+butdesy.toString()+"\n")
         for (i in 1..(pather[butdesx][butdesy].size-1)){
-
-            buttons[pather[butdesx][butdesy][i][0]][pather[butdesx][butdesy][i][1]].background=gdForGreenColor
+            buttons[pather[butdesx][butdesy][i][0]][pather[butdesx][butdesy][i][1]].setInactiveImage(R.drawable.ic_mathematics_green)
+            buttons[pather[butdesx][butdesy][i][0]][pather[butdesx][butdesy][i][1]].setActiveImage(R.drawable.ic_mathematics_green)
+            buttons[pather[butdesx][butdesy][i][0]][pather[butdesx][butdesy][i][1]].playAnimation()
+            delay(200)
 
             //tester.append(pather[butdesx][butdesy][i][0].toString()+" "+pather[butdesx][butdesy][i][1].toString()+"\n")
-
-
 
         }
         if(pather[butdesx][butdesy].size==0){
             Toast.makeText(this,"NO PATH FOUND", Toast.LENGTH_LONG).show()
         }
+        clearbut.isClickable=true
     }
     private fun gradientDrawableValueSetter() {
         gdForRedColor.setColor(Color.parseColor("#FF0000"))
@@ -368,17 +417,16 @@ class MainActivity : AppCompatActivity() {
         gdForBlueColor.cornerRadius=10.0f
         gdForBlueColor.setStroke(1,Color.parseColor("#000000"))
     }
-    private fun paintAllButtonsWhite() {
-        for (i in 0..sizeb)
-        {
-            for (j in 0..(size))
-            {
-                buttons[i][j].background=gdForWhiteColor
-            }
-        }
-    }
     private fun createButtonGrid() {
-
+        val screenLinearLayout = LinearLayout(this)
+        screenLinearLayout.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        screenLinearLayout.orientation = LinearLayout.VERTICAL
+        var screenid = resources.getIdentifier("screen", "id", packageName)
+        screenLinearLayout.id=screenid
+        mainscreen.addView(screenLinearLayout)
         for (i in 0..sizeb) {
 
             val arrayLinearLayout = LinearLayout(this)
@@ -389,76 +437,99 @@ class MainActivity : AppCompatActivity() {
             arrayLinearLayout.orientation = LinearLayout.HORIZONTAL
             //arrayLinearLayout.setPadding(2,2,2,2)
 
-            val buttonStatusRow: MutableMap<Button,Int> = mutableMapOf()
-            val buttonRow:MutableList<Button> = mutableListOf()
+            val buttonStatusRow: MutableMap<SparkButton,Int> = mutableMapOf()
+            val buttonRow:MutableList<SparkButton> = mutableListOf()
             for (j in 0..(size)) {
-                val button = Button(this)
-                button.layoutParams = LinearLayout.LayoutParams(
+                val sbutton: SparkButton = SparkButtonBuilder(this).setImageSizeDp(30)
+                    .setActiveImage(R.drawable.ic_mathematics)
+                    .setInactiveImage(R.drawable.ic_mathematics_empty)
+                    .setPrimaryColor(ContextCompat.getColor(this, android.R.color.holo_blue_dark))
+                    .setSecondaryColor(ContextCompat.getColor(this, android.R.color.holo_green_dark))
+                    .build()
+                sbutton.layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     1.0f
                 )
-                //button.setPadding(3,3,3,3)
-                button.background=null
-                button.setOnLongClickListener {
-                    if(startStatusKeeper==1) {
-                        if(endStatusKeeper==1) {
-                            val buttonStatus = buttonStatusRow.get(button)
-                            if (buttonStatus == 2) {
-                                button.background = gdForWhiteColor
-                                buttonStatusRow.put(button, 0)
-                            } else {
-                                button.setBackgroundResource(R.drawable.ic_gymnastic)
-                                //button.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#000000")))
-                                buttonStatusRow.put(button, 2)
-                            }
-                            return@setOnLongClickListener true
+
+                sbutton.setEventListener(object : SparkEventListener {
+                    override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {
+
+                    }
+
+                    override fun onEvent(button: ImageView?, buttonState: Boolean) {
+                        if(startStatusKeeper==0)
+                        {
+                            sbutton.setActiveImage(R.drawable.ic_trending_flat_24px)
+                            sbutton.isClickable=false
+                            sbutton.setInactiveImage(R.drawable.ic_trending_flat_24px)
+                            startStatusKeeper=1
+                            buttonStatusRow.put(sbutton, 3)
+                            Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                            butsrcx=i
+                            butsrcy=j
 
                         }
-                    }
-                    return@setOnLongClickListener false
-                }
-                button.setOnClickListener {
-                    if(startStatusKeeper==0)
-                    {
-                        button.setBackgroundResource(R.drawable.ic_trending_flat_24px)
-                        button.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF0000")))
-                        button.isClickable=false
-                        startStatusKeeper=1
-                        butsrcx=i
-                        butsrcy=j
-                    }
-                    else if(endStatusKeeper==0){
-                        button.setBackgroundResource(R.drawable.ic_gps_fixed_24px)
-                        button.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#008000")))
-                        button.isClickable=false
-                        endStatusKeeper=1
-                        butdesx=i
-                        butdesy=j
-                        //findPath()
-                    }
-                    else {
-                        val buttonStatus = buttonStatusRow.get(button)
-                        if (buttonStatus == 0) {
-                            button.background=gdForBrownColor
-                            buttonStatusRow.put(button, 1)
-                        } else if (buttonStatus == 1) {
-                            button.background=gdForWhiteColor
-                            buttonStatusRow.put(button, 0)
+                        else if(endStatusKeeper==0){
+                            sbutton.setActiveImage(R.drawable.ic_gps_fixed_24px)
+                            sbutton.isClickable=false
+                            sbutton.setInactiveImage(R.drawable.ic_gps_fixed_24px)
+                            //sbutton.pressOnTouch(false)
+                            endStatusKeeper=1
+                            buttonStatusRow.put(sbutton, 3)
+                            Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                            butdesx=i
+                            butdesy=j
+
+                            //findPath()
                         }
-                        else if (buttonStatus == 2) {
-                            button.background = gdForBrownColor
-                            buttonStatusRow.put(button, 1)
+                        else {
+                            if(buttonStatusRow.get(sbutton)!=3) {
+                                if (buttonWeightStatus == 0) {
+                                    sbutton.setActiveImage(R.drawable.ic_mathematics)
+                                    val buttonStatus = buttonStatusRow.get(sbutton)
+                                    if (buttonStatus == 0) {
+                                        buttonStatusRow.put(sbutton, 1)
+                                        Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                                    } else if (buttonStatus == 1) {
+                                        buttonStatusRow.put(sbutton, 0)
+                                        Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                                    } else {
+                                        buttonStatusRow.put(sbutton, 0)
+                                        Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                                    }
+                                } else {
+                                    sbutton.setActiveImage(R.drawable.ic_gymnastic)
+                                    val buttonStatus = buttonStatusRow.get(sbutton)
+                                    if (buttonStatus == 0) {
+                                        buttonStatusRow.put(sbutton, 2)
+                                        Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                                    } else if (buttonStatus == 2) {
+                                        buttonStatusRow.put(sbutton, 0)
+                                        Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                                    } else {
+                                        buttonStatusRow.put(sbutton, 0)
+                                        Log.i("buttonstatus","BUTTON "+i.toString()+" "+j.toString()+"="+buttonStatusRow.get(sbutton).toString())
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-                buttonStatusRow.put(button,0)
-                buttonRow.add(button)
-                arrayLinearLayout.addView(button)
+
+                    override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {
+
+                    }
+                })
+
+//
+
+                buttonStatusRow.put(sbutton,0)
+                buttonRow.add(sbutton)
+                arrayLinearLayout.addView(sbutton)
             }
             buttonStatusKeeper.add(buttonStatusRow)
             buttons.add(buttonRow)
-            screen.addView(arrayLinearLayout)
+            screenLinearLayout.addView(arrayLinearLayout)
         }
     }
 }

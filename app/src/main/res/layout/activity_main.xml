@@ -5,19 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+   >
 
     <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="0dp" android:layout_weight="20"
-    android:orientation="vertical"
-    android:id="@+id/screen"/>
-
-    <Button
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:text="Visualise"
-        android:id="@+id/search"/>
+        android:layout_height="0dp" android:layout_weight="20"
+        android:orientation="vertical"
+        android:id="@+id/mainscreen"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="2"
+        android:orientation="horizontal"
+        android:id="@+id/butview">
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Visualise"
+            android:id="@+id/search"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Weight"
+            android:id="@+id/weightbut"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="CLEAR"
+            android:id="@+id/clearbut"/>
+    </LinearLayout>
 
 </LinearLayout>
