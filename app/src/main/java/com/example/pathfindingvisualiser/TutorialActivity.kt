@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.activity_tutorial.*
 import java.util.stream.IntStream.range
 
 class TutorialActivity : AppCompatActivity() {
-    var mDots = arrayOfNulls<TextView>(3)
+    var mDots = arrayOfNulls<TextView>(5)
     var count :Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +26,8 @@ class TutorialActivity : AppCompatActivity() {
             addf(FirstFragment())
             addf(SecondFragment())
             addf(ThirdFragment())
+            addf(FourthFragment())
+            addf(FifthFragment())
         }
 
 
@@ -90,18 +92,18 @@ class TutorialActivity : AppCompatActivity() {
     }
 
     private fun DotStatus(pos: Int){
-        mDots = arrayOfNulls<TextView>(3)
+        mDots = arrayOfNulls<TextView>(5)
         dotsLayout.removeAllViews()
         for(i  in 0 until mDots.size){
             mDots[i] = TextView(this)
             mDots[i]?.text = "•"
             mDots[i]?.textSize = 35F
-            mDots[i]?.setTextColor(Color.parseColor("#50ffffff"))
+            mDots[i]?.setTextColor(Color.parseColor("#50000000"))
 
             dotsLayout.addView(mDots[i])
         }
         mDots[pos]?.textSize = 45F
-        mDots[pos]?.setTextColor(Color.parseColor("#ffffff"))
+        mDots[pos]?.setTextColor(Color.parseColor("#000000"))
     }
 
 }

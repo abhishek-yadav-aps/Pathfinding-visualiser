@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark"
-    android:background="@drawable/dark_bg"
+    android:theme="@style/ThemeOverlay.AppCompat.Light"
     tools:context=".TutorialActivity">
 
     <androidx.viewpager.widget.ViewPager
@@ -27,8 +26,8 @@
         android:gravity="center_vertical|center_horizontal"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/next"
-        app:layout_constraintStart_toEndOf="@+id/back" />
+        app:layout_constraintEnd_toEndOf="@+id/next"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/next"
