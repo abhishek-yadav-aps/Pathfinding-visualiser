@@ -6,9 +6,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 
 import androidx.annotation.RequiresApi
@@ -66,8 +64,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        //Toolbar
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+
         gradientDrawableValueSetter()
         createButtonGrid()
+
         //paintAllButtonsWhite()
         search.setOnClickListener {
             if(startStatusKeeper==0)
@@ -80,16 +84,46 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        weightbut.setOnClickListener {
+        weight_btn.setOnClickListener {
             if(buttonWeightStatus==0)
                 buttonWeightStatus=1
             else
                 buttonWeightStatus=0
         }
+
         clearbut.setOnClickListener {
             clearGrid()
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        //return super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.path_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+
+            R.id.id_dijkstra -> {
+                //dijkstra()
+                return true  }
+            R.id.id_dfs -> {
+                //dfs()
+                return true
+            }
+            R.id.id_bfs -> {
+                //bfs()
+                return true
+            }
+            R.id.id_astar -> {
+                //astar()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 
     private fun clearGrid() {
         var screenid = resources.getIdentifier("screen", "id", packageName)
@@ -115,7 +149,8 @@ class MainActivity : AppCompatActivity() {
         desy=-1
         createButtonGrid()
         search.isClickable=true
-        weightbut.isClickable=true
+
+        weight_btn.isClickable=true
 
     }
 
@@ -356,7 +391,7 @@ class MainActivity : AppCompatActivity() {
     }
     private suspend fun findPath() {
         search.isClickable=false
-        weightbut.isClickable=false
+        weight_btn.isClickable=false
         clearbut.isClickable=false
         sized=size+1
         srcx=butsrcx
