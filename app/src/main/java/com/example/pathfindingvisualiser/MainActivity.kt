@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this,"Select Ending Node!!",Toast.LENGTH_LONG).show()
             else {
                 GlobalScope.launch(Dispatchers.Main) {
-                    findPathDFS()
+                    findPathdijikstra()
                 }
             }
         }
@@ -88,7 +88,29 @@ class MainActivity : AppCompatActivity() {
         clearbut.setOnClickListener {
             clearGrid()
         }
+
+
+        mazebut.setOnClickListener {
+            if(startStatusKeeper==0) {
+                clearGrid()
+                createmaze()
+            }
+            else
+                Toast.makeText(this,"Maze can only be generated in begining",Toast.LENGTH_LONG).show()
+        }
     }
+
+    private fun createmaze() {
+        for (k in 0..100) {
+            var i = (0..sizeb).random()
+            var j = (0..size).random()
+            buttonStatusKeeper[i].put(buttons[i][j],1)
+            buttons[i][j].setInactiveImage(R.drawable.ic_mathematics)
+            buttons[i][j].setActiveImage(R.drawable.ic_mathematics)
+            buttons[i][j].playAnimation()
+        }
+    }
+
     private fun clearGrid() {
         var screenid = resources.getIdentifier("screen", "id", packageName)
         val screen=findViewById<LinearLayout>(screenid)
@@ -112,6 +134,8 @@ class MainActivity : AppCompatActivity() {
         desx=-1
         desy=-1
         createButtonGrid()
+        vis.removeAll(vis)
+        dfsPath.removeAll(dfsPath)
         search.isClickable=true
         weightbut.isClickable=true
 
@@ -347,6 +371,10 @@ class MainActivity : AppCompatActivity() {
             delay(100)
 
         }
+        if(dfsPath.size==0)
+        {
+            Toast.makeText(this,"NO PATH FOUND!!",Toast.LENGTH_LONG).show()
+        }
         clearbut.isClickable=true
     }
     fun weightMaker() {
@@ -532,6 +560,14 @@ class MainActivity : AppCompatActivity() {
             path.add(row)
         }
 
+        for (i in 0..(v.size - 1)) {
+            var disvec: MutableList<Int> = mutableListOf()
+            for (j in 0..(v[i].size - 1)) {
+
+                disvec.add(500)
+            }
+            dis.add(disvec)
+        }
 
 
         var temp = Tuple2(0, srcx, srcy)

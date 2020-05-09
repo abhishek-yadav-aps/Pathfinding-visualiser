@@ -71,6 +71,12 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="CLEAR" />
+            <Button
+                android:id="@+id/mazebut"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="MAZE" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
