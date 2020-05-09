@@ -1,21 +1,17 @@
 package com.example.pathfindingvisualiser
 
-import android.content.res.ColorStateList
+
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.ViewGroup
 import android.widget.*
-
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.marginBottom
-import androidx.core.view.marginLeft
-import androidx.core.view.marginTop
-import androidx.core.view.setPadding
 import com.varunest.sparkbutton.SparkButton
 import com.varunest.sparkbutton.SparkButtonBuilder
 import com.varunest.sparkbutton.SparkEventListener
@@ -60,6 +56,8 @@ class MainActivity : AppCompatActivity() {
     var desx: Int=-1
     var desy: Int=-1
 
+    var vis:MutableList<MutableList<Int>> = mutableListOf()
+    var dfsPath:MutableList<MutableList<Int>> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,15 +78,18 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this,"Select Ending Node!!",Toast.LENGTH_LONG).show()
             else {
                 GlobalScope.launch(Dispatchers.Main) {
-                    findPath()
+                    findPathDFS()
                 }
             }
         }
         weight_btn.setOnClickListener {
-            if(buttonWeightStatus==0)
-                buttonWeightStatus=1
-            else
+            if(buttonWeightStatus==0){
+                weight_btn.text = "BLOCK"
+                buttonWeightStatus=1 }
+            else{
+                weight_btn.text = "WEIGHT"
                 buttonWeightStatus=0
+            }
         }
 
         clearbut.setOnClickListener {
@@ -124,7 +125,6 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-
     private fun clearGrid() {
         var screenid = resources.getIdentifier("screen", "id", packageName)
         val screen=findViewById<LinearLayout>(screenid)
@@ -153,7 +153,239 @@ class MainActivity : AppCompatActivity() {
         weight_btn.isClickable=true
 
     }
+    suspend fun dfs(x:Int, y:Int):Boolean{
+        if(vis[x][y]==0)
+        {
+            buttons[x][y].setInactiveImage(R.drawable.ic_mathematics_blue)
+            buttons[x][y].playAnimation()
+            delay(50)
+            vis[x][y]=1
+            if(x==desx){
+                if(y==desy){
+                    var point:MutableList<Int> = mutableListOf()
+                    point.add(x)
+                    point.add(y)
+                    dfsPath.add(point)
+                    return true
+                }
+            }
+            for (i in 0..(v[x][y].size-1)){
+                var returner_val=false
+                var job1=GlobalScope.launch(Dispatchers.Main) {
+                    returner_val = dfs(v[x][y][i][0], v[x][y][i][1])
+                }
+                job1.join()
+                if(returner_val==true){
+                    var point:MutableList<Int> = mutableListOf()
+                    point.add(x)
+                    point.add(y)
+                    dfsPath.add(point)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    suspend fun findPathDFS(){
+        search.isClickable=false
+        clearbut.isClickable=false
+        for (i in 0..(sizeb)) {
+            var row: MutableList<MutableList<MutableList<Int>>> = mutableListOf()
+            for (j in 0..(size)) {
+                var point: MutableList<MutableList<Int>> = mutableListOf()
+                if (i == 0 && j == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i + 1)
+                    neigh1.add(j)
 
+                    point.add(neigh1)
+
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i)
+                    neigh2.add(j + 1)
+
+                    point.add(neigh2)
+
+                } else if (i == sizeb  && j == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i)
+                    neigh2.add(j + 1)
+
+                    point.add(neigh2)
+
+                } else if (i == 0 && j == size) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i + 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+
+                    point.add(neigh2)
+
+                } else if (i == sizeb  && j == size ) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+
+                    point.add(neigh2)
+
+                } else if (i == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i + 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j + 1)
+
+                    point.add(neigh3)
+
+                } else if (i == sizeb) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i)
+                    neigh2.add(j - 1)
+
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j + 1)
+
+                    point.add(neigh3)
+
+                } else if (j == 0) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+
+                    var neigh2: MutableList<Int> = mutableListOf()
+                    neigh2.add(i + 1)
+                    neigh2.add(j)
+
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j + 1)
+
+                    point.add(neigh3)
+
+                } else if (j == size) {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i + 1)
+                    neigh2.add(j)
+
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j - 1)
+
+                    point.add(neigh3)
+
+                } else {
+                    var neigh1: MutableList<Int> = mutableListOf()
+                    neigh1.add(i - 1)
+                    neigh1.add(j)
+
+                    point.add(neigh1)
+                    var neigh2: MutableList<Int> = mutableListOf()
+
+                    neigh2.add(i + 1)
+                    neigh2.add(j)
+
+                    point.add(neigh2)
+                    var neigh3: MutableList<Int> = mutableListOf()
+
+                    neigh3.add(i)
+                    neigh3.add(j - 1)
+                    point.add(neigh3)
+                    var neigh4: MutableList<Int> = mutableListOf()
+
+                    neigh4.add(i)
+                    neigh4.add(j + 1)
+
+                    point.add(neigh4)
+
+                }
+                row.add(point)
+            }
+            v.add(row)
+        }
+
+        for (i in 0..(v.size - 1)) {
+            var visvec: MutableList<Int> = mutableListOf()
+            for (j in 0..(v[i].size - 1)) {
+
+                visvec.add(0)
+            }
+            vis.add(visvec)
+        }
+
+        for (i in 0..sizeb){
+            for(j in 0..size){
+                if(buttonStatusKeeper[i].get(buttons[i][j])==1){
+                    vis[i][j]=1
+                }
+            }
+        }
+
+
+        srcx=butsrcx
+        srcy=butsrcy
+        desx=butdesx
+        desy=butdesy
+        var job2=GlobalScope.launch(Dispatchers.Main) {
+        dfs(srcx,srcy)}
+        job2.join()
+
+        for (i in (dfsPath.size-2) downTo 1){
+            buttons[dfsPath[i][0]][dfsPath[i][1]].setInactiveImage(R.drawable.ic_mathematics_green)
+            buttons[dfsPath[i][0]][dfsPath[i][1]].setActiveImage(R.drawable.ic_mathematics_green)
+            buttons[dfsPath[i][0]][dfsPath[i][1]].playAnimation()
+            delay(100)
+
+        }
+        clearbut.isClickable=true
+    }
     fun weightMaker() {
         for (i in 0..(sizeb)) {
             var weightvec: MutableList<Int> = mutableListOf()
@@ -327,13 +559,6 @@ class MainActivity : AppCompatActivity() {
             v.add(row)
         }
 
-        for (i in 0..(v.size - 1)) {
-            var disvec: MutableList<Int> = mutableListOf()
-            for (j in 0..(v[i].size - 1)) {
-                disvec.add(100)
-            }
-            dis.add(disvec)
-        }
 
         for (i in 0..(v.size - 1)) {
             var row: MutableList<MutableList<MutableList<Int>>> = mutableListOf()
@@ -389,7 +614,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private suspend fun findPath() {
+    private suspend fun findPathdijikstra() {
         search.isClickable=false
         weight_btn.isClickable=false
         clearbut.isClickable=false
