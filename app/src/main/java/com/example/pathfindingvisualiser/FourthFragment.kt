@@ -28,7 +28,7 @@ class FourthFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             var mediaController = MediaController(activity)
             videoView.setMediaController(mediaController)
             val path = "android.resource://com.example.pathfindingvisualiser/"+ R.raw.maze;
