@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
  * A simple [Fragment] subclass.
  */
 class FifthFragment : Fragment() {
-
+    var visible=0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -26,17 +26,33 @@ class FifthFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_fifth, container, false)
     }
 
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        if(isVisibleToUser)
+        {
+            visible=1
+            video()
+        }
+        else{
+            visible=0
+        }
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+    }
+    fun video(){
+        if(visible==1) {
 
-        CoroutineScope(Dispatchers.Default).launch {
-            var mediaController = MediaController(activity)
-            videoView2.setMediaController(mediaController)
-            val path = "android.resource://com.example.pathfindingvisualiser/"+ R.raw.dijs;
-            val uri = Uri.parse(path)
-            videoView2.setVideoURI(uri)
-            videoView2.start()
+            var job = CoroutineScope(Dispatchers.Main).launch {
+                var mediaController = MediaController(activity)
+                videoView2.setMediaController(mediaController)
+                val path = "android.resource://com.example.pathfindingvisualiser/" + R.raw.dijs;
+                val uri = Uri.parse(path)
+                videoView2.setVideoURI(uri)
+                videoView2.setMediaController(null)
+                videoView2.start()
+            }
         }
-}
+    }
 
 }
